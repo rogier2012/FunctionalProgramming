@@ -19,8 +19,9 @@ type Heap = [Int]
 type Variable = String
 
 lut :: [(String,Int)]
-lut = [("var",123)]
+lut = [("a",1),("b",2),("c",3),("d",4),("e",5),("f",6),("g",7),("h",8)]
 
+lookupelem e [] = error "Key not found"
 lookupelem e (x:xs)
         | e == fst x = snd x
         | otherwise  = lookupelem e xs
@@ -64,7 +65,7 @@ core instrs (pc,sp,heap,stack) tick =  case instrs!!pc of
 
         PushAddr n   -> (pc+1, sp+1 , heap, stack <~ (sp,(heap!!n)))
 
-        Store n -> (pc+1, sp-1, heap<~(n, stack!!sp), stack )
+        Store n -> (pc+1, sp-1, heap<~(n, stack!!(sp-1)), stack )
 
         Calc op  -> (pc+1, sp-1 ,heap, stack <~ (sp-2,v))
                  where

@@ -16,4 +16,5 @@ ppExpr (BinExpr op t1 t2) = RoseNode (show op) [ppExpr(t1),ppExpr(t2)]
 
 
 codeGen' :: Stmnt -> [Instr ]
-codeGen' (Assign var expr) = codeGen expr ++ [Store (lookupelem var lut)]
+codeGen' (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut),EndProg]
+
