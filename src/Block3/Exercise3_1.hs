@@ -2,23 +2,22 @@ module Exercise3_1 where
 import FPPrac.Trees
 import FP_Core
 
-codeGenerator :: Expr -> [Instr]
-codeGenerator (Const x) = [PushConst x]
-codeGenerator (Variable x) = [PushAddr (lookupelem x lut)]
-codeGenerator (BinExpr op t1 t2) = (codeGenerator t1) ++ (codeGenerator t2) ++ [(Calc op)]
+
 
 
 class CodeGen a where
     codeGen :: a -> [Instr]
 
 instance CodeGen Expr where
-    codeGen expr = codeGenerator expr ++ [EndProg]
+    codeGen (Const x) = [PushConst x]
+    codeGen (Variable x) = [PushAddr (lookupelem x lut)]
+    codeGen (BinExpr op t1 t2) = (codeGen t1) ++ (codeGen t2) ++ [(Calc op)]
 
 instance CodeGen Stmnt where
-    codeGen (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut)]
+    codeGen (Assign var expr) = codeGen expr ++ [Store (lookupelem var lut)]
+    codeGen (Repeat expr xs) = codeGen expr ++ [PushPC] ++ concat(map codeGen xs) ++ [EndRep,EndProg]
 
-instance CodeGen Repeat where
-    codeGen (expr xs) = codeGenerator expr ++ [PushPC] ++ (map codeGen xs) ++ [EndRep]
+
 
 class PPInstr a where
     ppInstr :: a -> RoseTree

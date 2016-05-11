@@ -48,8 +48,9 @@ data Expr = Const Int                   -- for constants
 
 
 data Stmnt = Assign Variable Expr
+           | Repeat Expr [Stmnt]
 
-data Repeat = Expr [Stmnt]
+
 
 -- ========================================================================
 -- Processor functions
