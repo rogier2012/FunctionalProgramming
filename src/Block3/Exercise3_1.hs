@@ -11,11 +11,14 @@ codeGenerator (BinExpr op t1 t2) = (codeGenerator t1) ++ (codeGenerator t2) ++ [
 class CodeGen a where
     codeGen :: a -> [Instr]
 
-instance CodeGen(Expr) where
+instance CodeGen Expr where
     codeGen expr = codeGenerator expr ++ [EndProg]
 
-instance CodeGen(Stmnt) where
-    codeGen (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut),EndProg]
+instance CodeGen Stmnt where
+    codeGen (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut)]
+
+instance CodeGen Repeat where
+    codeGen (expr xs) = codeGenerator expr ++ [PushPC] ++ (map codeGen xs) ++ [EndRep]
 
 class PPInstr a where
     ppInstr :: a -> RoseTree
@@ -26,3 +29,4 @@ instance PPInstr(Expr) where
 
 instance PPInstr(Stmnt) where
     ppInstr (Assign var expr) = RoseNode var [ppInstr(expr)]
+

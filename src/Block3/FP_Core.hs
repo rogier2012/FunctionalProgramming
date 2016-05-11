@@ -34,9 +34,13 @@ data Instr  = PushConst Int
             | Store Int
             | Calc Op
             | EndProg
+            | PushPC
+            | EndRep
             deriving Show
 
 data Tick = Tick
+
+
 
 data Expr = Const Int                   -- for constants
           | Variable String             -- for variables
@@ -44,6 +48,8 @@ data Expr = Const Int                   -- for constants
 
 
 data Stmnt = Assign Variable Expr
+
+data Repeat = Expr [Stmnt]
 
 -- ========================================================================
 -- Processor functions
@@ -65,11 +71,18 @@ core instrs (pc,sp,heap,stack) tick =  case instrs!!pc of
 
         PushAddr n   -> (pc+1, sp+1 , heap, stack <~ (sp,(heap!!n)))
 
+        PushPC  -> (pc+1, sp+1, heap, stack <~ (sp,pc+1))
+
         Store n -> (pc+1, sp-1, heap<~(n, stack!!(sp-1)), stack )
 
         Calc op  -> (pc+1, sp-1 ,heap, stack <~ (sp-2,v))
                  where
                    v = alu op (stack!!(sp-2)) (stack!!(sp-1))
+
+        EndRep -> (loop, sp, heap, (stack <~(expr,(expr-1))))
+                where
+                    expr = stack!!(sp-2)
+                    loop = stack!!(sp-1)
 
         EndProg  -> (-1, sp,heap, stack)
 
