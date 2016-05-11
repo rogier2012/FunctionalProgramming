@@ -1,0 +1,20 @@
+name:              Block2
+version:           1.0
+Build-Type:        Simple
+cabal-version:     >= 1.2
+
+executable Block1
+  main-is:         Main.hs
+  hs-source-dirs:  src/Block1/
+  build-depends:   base, twentefp-eventloop-trees
+
+
+executable Block2
+  main-is:         Main.hs
+  hs-source-dirs:  src/Block2/
+  build-depends:   base, twentefp-eventloop-trees
+
+executable Block3
+   main-is:         Main.hs
+   hs-source-dirs:  src/Block3/
+   build-depends:   base, twentefp-eventloop-trees
