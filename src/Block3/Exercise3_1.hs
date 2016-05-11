@@ -7,14 +7,22 @@ codeGenerator (Const x) = [PushConst x]
 codeGenerator (Variable x) = [PushAddr (lookupelem x lut)]
 codeGenerator (BinExpr op t1 t2) = (codeGenerator t1) ++ (codeGenerator t2) ++ [(Calc op)]
 
-codeGen :: Expr -> [Instr]
-codeGen expr = codeGenerator expr ++ [EndProg]
 
-ppExpr :: Expr -> RoseTree
-ppExpr (Const x) = RoseNode (show x) []
-ppExpr (BinExpr op t1 t2) = RoseNode (show op) [ppExpr(t1),ppExpr(t2)]
+class CodeGen a where
+    codeGen :: a -> [Instr]
 
+instance CodeGen(Expr) where
+    codeGen expr = codeGenerator expr ++ [EndProg]
 
-codeGen' :: Stmnt -> [Instr ]
-codeGen' (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut),EndProg]
+instance CodeGen(Stmnt) where
+    codeGen (Assign var expr) = codeGenerator expr ++ [Store (lookupelem var lut),EndProg]
 
+class PPInstr a where
+    ppInstr :: a -> RoseTree
+
+instance PPInstr(Expr) where
+    ppInstr (Const x) = RoseNode (show x) []
+    ppInstr (BinExpr op t1 t2) = RoseNode (show op) [ppInstr(t1),ppInstr(t2)]
+
+instance PPInstr(Stmnt) where
+    ppInstr (Assign var expr) = RoseNode var [ppInstr(expr)]
