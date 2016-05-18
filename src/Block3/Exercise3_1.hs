@@ -15,8 +15,7 @@ instance CodeGen Expr where
 
 instance CodeGen Stmnt where
     codeGen (Assign var expr) = codeGen expr ++ [Store (lookupelem var lut)]
-    codeGen (Repeat expr xs) = codeGen expr ++ [PushPC] ++ concat(map codeGen xs) ++ [EndRep,EndProg]
-
+    codeGen (Repeat expr xs) = codeGen expr ++ [PushPC] ++ concat(map codeGen xs) ++ [EndRep]
 
 
 class PPInstr a where
