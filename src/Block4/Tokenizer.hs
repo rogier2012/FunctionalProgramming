@@ -11,6 +11,8 @@ isOperator x = elem x "+-*^/<>="
 isBracket x = elem x "()"
 isWhite x = elem x " "
 
+reserved = ["repeat", "if", "else", "then"]
+
 
 num :: [(Alphabet,String,Int)] -> (States,String) -> String -> Int -> ([(Alphabet,String,Int)],States, String)
 num ys (s,token) (x:xs) cntr = case s of
@@ -52,7 +54,7 @@ brac :: [(Alphabet,String,Int)] -> (States,String) -> String -> Int -> ([(Alphab
 brac ys (s,token) (x:xs) cntr = case s of
             Q | x == '(' || x== ')'     -> brac ys (R, token ++ [x]) xs cntr
               | otherwise               -> brac ys (E, token) xs cntr
-            R                           -> tokenize (x:xs) (ys++[(Bracket,token,cntr + 1)]) (cntr+1)
+            R                           -> tokenize (x:xs) (ys++[(Bracket,token,cntr)]) (cntr)
             E                           -> brac ys (E,token) xs cntr
 
 
@@ -72,10 +74,16 @@ tokenize xs ys cntr
               | isOperator (head xs)    = oper ys (Q, "") xs cntr
               | isWhite (head xs)       = whit ys (Q, "") xs cntr
               | xs == "#"               = (ys, Q, xs )
-              | otherwise               = error "Parse error "
+              | otherwise               = error "Parse error"
 
 fst3 :: ([(Alphabet,String,Int)],a,b) -> [(Alphabet,String,Int)]
 fst3 (x,_,_) = x
 
+checkreserved :: [(Alphabet,String,Int)] -> [(Alphabet,String,Int)]
+checkreserved []                        = []
+checkreserved ((a,x,b):xs)
+               | elem x reserved == False = (a,x,b) : checkreserved xs
+               | otherwise              = (Reserved,x,b) : checkreserved xs
+
 tokenizer :: String -> [(Alphabet,String,Int)]
-tokenizer xs = fst3 (tokenize (xs++"#") [] 0)
+tokenizer xs =  checkreserved $ fst3 (tokenize (xs++"#") [] 0)

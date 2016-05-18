@@ -31,7 +31,7 @@ data Alphabet = Terminal String               -- Terminal symbol: WILL be includ
               | Bracket                       -- Brackets
               | Var                           -- Variable
               | Stmnt                         -- Statement
-              | Assign                        -- Assignment
+              | Reserved                      -- Reserved Keyword
               deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 -- ===================================================================
