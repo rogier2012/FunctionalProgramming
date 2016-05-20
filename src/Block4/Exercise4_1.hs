@@ -65,10 +65,9 @@ transform :: ParseTree -> AST
 transform (PNode Stmnt xs)                          = St (transformStmnt(PNode Stmnt xs))
 transform (PNode Expr xs)                           = Ex (transformExpr(PNode Expr xs))
 
-
+transformStmnt :: ParseTree -> ASTStmnt
 transformStmnt (PNode Stmnt [(PLeaf x),n2,n3])      = Repeat (transformExpr n2) (transformStmnt n3)
 transformStmnt (PNode Stmnt [n1,(PLeaf x),n3])      = Assign (variable n1) (transformExpr n3)
-variable       (PNode Var [(PLeaf (a,b,c))])        = b
 
 transformExpr :: ParseTree -> ASTExpr
 transformExpr (PNode Expr [n1, n2, n3])             = BinExpr (operation n2) (transformExpr n1) (transformExpr n3)
@@ -76,10 +75,34 @@ transformExpr (PNode Expr [n1])                     = transformExpr n1
 transformExpr (PNode Nmbr [(PLeaf (a,b,c))])        = Const (read b)
 transformExpr (PNode Var [(PLeaf (a,b,c))])         = Variable b
 
+variable       (PNode Var [(PLeaf (a,b,c))])        = b
 operation (PNode Op [(PLeaf (a,b,c))])              = b
 
-example = "(a+3)"
-assign = "repeat (3+3) x=1"
+example = "((a+3)*4)"
+assign = "repeat (3+3) repeat (3+3) x=1"
+
+instance ToRoseTree ASTExpr where
+    toRoseTree t = case t of
+            BinExpr s t1 t2     -> RoseNode s [(toRoseTree t1),(toRoseTree t2)]
+
+            Const x             -> RoseNode (show x) []
+
+            Variable x          -> RoseNode x []
+
+instance ToRoseTree ASTStmnt where
+    toRoseTree t = case t of
+            Assign s t      -> RoseNode s [(toRoseTree t)]
+            Repeat t1 t2    -> RoseNode "Repeat" [(toRoseTree t1),(toRoseTree t2)]
+
+instance ToRoseTree AST where
+    toRoseTree t = case t of
+            St t ->   toRoseTree t
+            Ex t ->   toRoseTree t
+
+
+
 
 exampleprint = prpr $ parse grammar Expr (tokenizer example)
 exampleass = showTree $ toRoseTree $ parse grammar Stmnt (tokenizer assign)
+hallo =showTree $ toRoseTree $ transform $ parse grammar Expr (tokenizer example)
+hallot =showTree $ toRoseTree $ transform $ parse grammar Stmnt (tokenizer assign)
