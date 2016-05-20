@@ -33,9 +33,53 @@ nmbr      = SyntCat Nmbr
 op        = SyntCat Op
 var       = SyntCat Var
 
+type Variable = String
 
-example = "((3+3)*4)"
-assign = "repeat (3+3) hoi=3"
+data AST = Ex ASTExpr
+         | St ASTStmnt
+
+data ASTExpr = Const Int
+             | Variable String
+             | BinExpr String ASTExpr ASTExpr
+
+
+
+data ASTStmnt = Assign String ASTExpr
+              | Repeat ASTExpr ASTStmnt
+
+
+--toAst :: ParseTree -> AST
+
+--toAst (PLeaf (tkn,str, i))
+-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =   ===               =             = = = =   ====  ===   = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =   =  =                            = = = =   =     =  =  = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =   ===    ==    ==   =   ==   = =  = = = =   = =   ===   = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =   = =   =  =  =  =  =  = ==  =    = = = =   =     =     = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =   =  =   ==    ===  =   ===  =    = = = =   =     =     = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =                  =                = = = =               = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = =                ==                 = = = =               = = = = = = = = = = = =
+-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+transform :: ParseTree -> AST
+transform (PNode Stmnt xs)                          = St (transformStmnt(PNode Stmnt xs))
+transform (PNode Expr xs)                           = Ex (transformExpr(PNode Expr xs))
+
+
+transformStmnt (PNode Stmnt [(PLeaf x),n2,n3])      = Repeat (transformExpr n2) (transformStmnt n3)
+transformStmnt (PNode Stmnt [n1,(PLeaf x),n3])      = Assign (variable n1) (transformExpr n3)
+variable       (PNode Var [(PLeaf (a,b,c))])        = b
+
+transformExpr :: ParseTree -> ASTExpr
+transformExpr (PNode Expr [n1, n2, n3])             = BinExpr (operation n2) (transformExpr n1) (transformExpr n3)
+transformExpr (PNode Expr [n1])                     = transformExpr n1
+transformExpr (PNode Nmbr [(PLeaf (a,b,c))])        = Const (read b)
+transformExpr (PNode Var [(PLeaf (a,b,c))])         = Variable b
+
+operation (PNode Op [(PLeaf (a,b,c))])              = b
+
+example = "(a+3)"
+assign = "repeat (3+3) x=1"
 
 exampleprint = prpr $ parse grammar Expr (tokenizer example)
-exampleass = prpr $ parse grammar Stmnt (tokenizer assign)
+exampleass = showTree $ toRoseTree $ parse grammar Stmnt (tokenizer assign)
