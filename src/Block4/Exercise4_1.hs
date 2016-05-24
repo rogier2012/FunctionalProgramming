@@ -13,9 +13,23 @@ grammar nt = case nt of
 
         Var     -> [[ var                                ]]
 
+
+        If      -> [[ iff, lBracket, Expr, Cond, Expr, rBracket]]
+
+        Then    -> [[ thenn, Expr]]
+
+        Else    -> [[ elsee, Expr]]
+
+        Cond    -> [[ eq ]
+                    ,[ gt ]
+                    ,[ gte ]
+                    ,[ lt ]
+                    ,[ lte ]]
+
         Expr    -> [[ lBracket, Expr, Op, Expr, rBracket ]
                    ,[ Nmbr                               ]
-                   ,[ Var                                ]]
+                   ,[ Var                                ]
+                   ,[ If,Then,Else]]
 
         Stmnt   -> [[ Var,is, Expr                        ]
                     , [rept, Expr, Stmnt                ]]
@@ -23,15 +37,27 @@ grammar nt = case nt of
 
 
 
-lBracket  = Symbol "("          -- Symbols will NOT be shown in the parse tree.
-rBracket  = Symbol ")"
-is        = Terminal "="
-rept      = Terminal "repeat"
+lBracket    = Symbol "("          -- Symbols will NOT be shown in the parse tree.
+rBracket    = Symbol ")"
+
+rept        = Terminal "repeat"
+iff         = Terminal "if"
+thenn       = Terminal "then"
+elsee       = Terminal "else"
+
+eq          = Terminal "=="
+gt          = Terminal ">"
+gte         = Terminal ">="
+lt          = Terminal "<"
+lte         = Terminal "<="
+
+is          = Terminal "="
 
 
-nmbr      = SyntCat Nmbr
-op        = SyntCat Op
-var       = SyntCat Var
+
+nmbr        = SyntCat Nmbr
+op          = SyntCat Op
+var         = SyntCat Var
 
 type Variable = String
 
@@ -75,11 +101,13 @@ transformExpr (PNode Expr [n1])                     = transformExpr n1
 transformExpr (PNode Nmbr [(PLeaf (a,b,c))])        = Const (read b)
 transformExpr (PNode Var [(PLeaf (a,b,c))])         = Variable b
 
-variable       (PNode Var [(PLeaf (a,b,c))])        = b
+variable  (PNode Var [(PLeaf (a,b,c))])             = b
 operation (PNode Op [(PLeaf (a,b,c))])              = b
 
-example = "((a+3)*4)"
+example = "((a+3)*(3-4))"
 assign = "repeat (3+3) repeat (3+3) x=1"
+
+ifexample = "if (3 == D) then 3 else 4"
 
 instance ToRoseTree ASTExpr where
     toRoseTree t = case t of
@@ -89,20 +117,28 @@ instance ToRoseTree ASTExpr where
 
             Variable x          -> RoseNode x []
 
+
 instance ToRoseTree ASTStmnt where
     toRoseTree t = case t of
-            Assign s t      -> RoseNode s [(toRoseTree t)]
-            Repeat t1 t2    -> RoseNode "Repeat" [(toRoseTree t1),(toRoseTree t2)]
+
+            Assign s t          -> RoseNode s [(toRoseTree t)]
+
+            Repeat t1 t2        -> RoseNode "Repeat" [(toRoseTree t1),(toRoseTree t2)]
+
 
 instance ToRoseTree AST where
     toRoseTree t = case t of
-            St t ->   toRoseTree t
-            Ex t ->   toRoseTree t
+
+            St t                -> toRoseTree t
+
+            Ex t                -> toRoseTree t
 
 
 
 
 exampleprint = prpr $ parse grammar Expr (tokenizer example)
 exampleass = showTree $ toRoseTree $ parse grammar Stmnt (tokenizer assign)
-hallo =showTree $ toRoseTree $ transform $ parse grammar Expr (tokenizer example)
-hallot =showTree $ toRoseTree $ transform $ parse grammar Stmnt (tokenizer assign)
+hallo = showTree $ toRoseTree $ transform $ parse grammar Expr (tokenizer example)
+hallot = showTree $ toRoseTree $ transform $ parse grammar Stmnt (tokenizer assign)
+
+

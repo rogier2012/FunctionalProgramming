@@ -32,6 +32,10 @@ data Alphabet = Terminal String               -- Terminal symbol: WILL be includ
               | Var                           -- Variable
               | Stmnt                         -- Statement
               | Reserved                      -- Reserved Keyword
+              | If
+              | Then
+              | Else
+              | Cond
               deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 -- ===================================================================

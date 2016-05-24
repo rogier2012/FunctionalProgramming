@@ -39,8 +39,8 @@ iden ys (s,token) (x:xs) cntr = case s of
 
 oper :: [(Alphabet,String,Int)] -> (States,String) -> String -> Int -> ([(Alphabet,String,Int)],States, String)
 oper ys (s,token) (x:xs) cntr = case s of
-            Q | elem x "-*%=/"          -> oper ys (R, token ++ [x]) xs cntr
-              | elem x "<>"             -> oper ys (T, token ++ [x]) xs cntr
+            Q | elem x "-*%/"          -> oper ys (R, token ++ [x]) xs cntr
+              | elem x "<>="            -> oper ys (T, token ++ [x]) xs cntr
               | x ==  '+'               -> oper ys (U, token ++ [x]) xs cntr
               | otherwise               -> oper ys (E, token)  xs cntr
             T | x == '='                -> oper ys (R, token ++ [x]) xs cntr
